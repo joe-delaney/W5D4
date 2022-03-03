@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+puts "Please enter your email"
+
+email = gets.chomp
+user = User.find_by(email: email)
+user ||= User.create!(email: email)
+submitted = user.submitted_urls.map {|shortened_url| shortened_url.short_url}
+
+if submitted.length == 0 
+  puts "Enter long url to convert it to a shortened url"
+  long_url = gets.chomp
+  ShortenedUrl.create_short_url(user, long_url)
+  puts "Enjoy your new short url: #{ShortenedUrl.last.short_url}"
+else
+  puts "Select \"1\" to visit a shortened url or select \"2\" to create one."
+
+  user_option = gets.chomp
+  until ["1", "2"].include?(user_option)
+    puts "Select \"1\" to visit a shortened url or select \"2\" to create one."
+    user_option = gets.chomp
+  end
+
+  if user_option == "1"
+    puts "Please enter the shortened url you would like to visit: "
+    print "Your options are: "
+    puts submitted 
+    "Select an index: "
+    user_index_selection = gets.chomp.to_i
+    until (0...submitted.length).to_a.include?(user_index_selection)
+      print "Your options are: "
+      puts submitted
+      "Select an index: "
+      user_index_selection = gets.chomp.to_i
+    end
+    shortened_url = submitted[user_index_selection]
+    Launchy.open(ShortenedUrl.find_by(short_url:shortened_url).long_url)
+  else
+    puts "Enter long url to convert it to a shortened url"
+    long_url = gets.chomp
+    ShortenedUrl.create_short_url(user, long_url)
+    puts "Enjoy your new short url: #{ShortenedUrl.last.short_url}"
+  end
+end
