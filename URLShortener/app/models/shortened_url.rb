@@ -32,6 +32,15 @@ class ShortenedUrl < ApplicationRecord
     through: :visits,
     source: :visitor
 
+  has_many :taggings,
+    primary_key: :id,
+    foreign_key: :url_id,
+    class_name: :Tagging
+
+  has_many :topics,
+    through: :taggings,
+    source: :topic
+
   def num_clicks
     visits.count
   end
